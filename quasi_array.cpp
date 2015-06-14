@@ -11,7 +11,7 @@ quasi_array<T>::quasi_array(size_t minSize = 1)
 	chunkSize = minSize;
 	capacity = minSize;
 
-	maxBit = 0;
+	maxBit = -1;
 
 	quickIndex = 0;
 	endIndex = minSize;
@@ -53,38 +53,50 @@ T* quasi_array<T>::at(size_t superindex, size_t subindex)
 }
 
 template <typename T>
-void quasi_array<T>::push_back(size_t minSize = 1)
+void quasi_array<T>::push_back(T data)
 {	
-	if(size == capacity)
+	if(quickIndex == endIndex)
 	{
-		lookupTable = (T**) realloc(lookupTable, tableSize*sizeof(T*));
-		lookupTable[tableSize] = farArray = (T*) malloc(capacity*sizeof(T));
-		
-		++tableSize;
-		capacity *= 2;
+		if(size == capacity)
+		{
+			lookupTable = (T**) realloc(lookupTable, tableSize*sizeof(T*));
+			lookupTable[tableSize] = (T*) malloc(capacity*sizeof(T));
+			++tableSize;
+			capacity *= 2;
+		}
+
+		farArray = lookupTable[maxBit+2];
+		++maxBit;
 		quickIndex = 0;
 	}
-	farArray[quickIndex];
+
+	farArray[quickIndex] = std::move(data);
 	++quickIndex;
 	++size;
 }
 
 template <typename T>
-T quasi_array<T>::pop_back(size_t minSize = 1)
+T quasi_array<T>::pop_back()
 {	
 	if(!empty())
 	{
-		if(quickIndex > 0)
+		if(quickIndex == 0)
 		{
-			lookupTable = (T**) realloc(lookupTable, tableSize*sizeof(T*));
-			lookupTable[tableSize] = farArray = (T*) malloc(capacity*sizeof(T));
-		
-			++tableSize;
-			capacity *= 2;
+			if(size == capacity/4)
+			{
+				--tableSize;
+				free lookupTable[maxBit];
+				lookupTable = (T**) realloc(lookupTable, (tableSize-1)*sizeof(T*));
+				capacity /= 2;
+			}
+			farArray = lookupTable[maxBit+1];
 			quickIndex = 0;
+			--tableSize;
+			--maxBit;
 		}
 		farArray[quickIndex];
-		++quickIndex;
+		--quickIndex;
+		--size;
 
 		return data;
 	}
