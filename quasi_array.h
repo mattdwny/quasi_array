@@ -24,7 +24,10 @@ private:
 	size_t chunkSize;
 	size_t tableSize;
 
-	size_t maxBit;
+	ssize_t maxBit;
+
+	size_t endIndex;
+	size_t quickIndex;
 
 	size_t superindexOf(size_t i);
 	size_t subindexOf(size_t i);
